@@ -1,5 +1,5 @@
 # Snowflake Arctic-Embed Models
-<h1 align="center">Snowflake's Artic-embed-m-long</h1>
+<h1 align="center">Snowflake's Artic-embed-*</h1>
 <h4 align="center">
    <p>
        <a href=#news>News</a> |
