@@ -115,7 +115,7 @@ Based on the [nomic-ai/nomic-embed-text-v1-unsupervised](https://huggingface.co/
 ### [snowflake-arctic-embed-l](https://huggingface.co/Snowflake/snowflake-arctic-embed-l/)
 
 
-Based on the [intfloat/e5-large-unsupervised](https://huggingface.co/intfloat/e5-large-unsupervised) model, this small model does not sacrifice retrieval accuracy for its small size.
+Based on the [intfloat/e5-large-unsupervised](https://huggingface.co/intfloat/e5-large-unsupervised) model, this large model is a direct drop-in for closed APIs and delivers the most accurate retrieval experience.
 
 
 | Model Name                                                         | MTEB Retrieval Score (NDCG @ 10) |
@@ -137,7 +137,7 @@ You can use the sentence-transformers package to use an snowflake-arctic-embed m
 ```python
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("Snowflake/snowflake-arctic-embed-m")
+model = SentenceTransformer("Snowflake/snowflake-arctic-embed-m-long", trust_remote_code=True)
 
 queries = ['what is snowflake?', 'Where can I get the best tacos?']
 documents = ['The Data Cloud!', 'Mexico City of Course!']
@@ -156,17 +156,17 @@ for query, query_scores in zip(queries, scores):
 ```
 ```
 Query: what is snowflake?
-0.20051965 The Data Cloud!
-0.07660701 Mexico City of Course!
+0.46484852 The Data Cloud!
+0.3758855 Mexico City of Course!
 Query: Where can I get the best tacos?
-0.24481852 Mexico City of Course!
-0.15664819 The Data Cloud!
+0.42407742 Mexico City of Course!
+0.36740506 The Data Cloud!
 ```
 
 ### Using Huggingface transformers
 
 
-You can use the transformers package to use a snowflake-arctic-embed model, as shown below. For optimal retrieval quality, use the CLS token to embed each text portion and use the query prefix below (just on the query).
+You can use the transformers package to use an snowflake-arctic-embed model, as shown below. For optimal retrieval quality, use the CLS token to embed each text portion and use the query prefix below (just on the query).
 
 
 
@@ -174,8 +174,8 @@ You can use the transformers package to use a snowflake-arctic-embed model, as s
 import torch
 from transformers import AutoModel, AutoTokenizer
 
-tokenizer = AutoTokenizer.from_pretrained('Snowflake/snowflake-arctic-embed-m')
-model = AutoModel.from_pretrained('Snowflake/snowflake-arctic-embed-m', add_pooling_layer=False)
+tokenizer = AutoTokenizer.from_pretrained('Snowflake/snowflake-arctic-embed-m-long')
+model = AutoModel.from_pretrained('Snowflake/snowflake-arctic-embed-m-long', trust_remote_code=True, add_pooling_layer=False, safe_serialization=True)
 model.eval()
 
 query_prefix = 'Represent this sentence for searching relevant passages: '
@@ -204,6 +204,45 @@ for query, query_scores in zip(queries, scores):
     print("Query:", query)
     for document, score in doc_score_pairs:
         print(score, document)
+```
+
+
+If you use the long context model with more than 2048 tokens, ensure that you initialize the model like below instead. This will use [RPE](https://arxiv.org/abs/2104.09864) to allow up to 8192 tokens.
+
+
+``` py
+model = AutoModel.from_pretrained('Snowflake/snowflake-arctic-embed-m-long', trust_remote_code=True, safe_serialization=True, rotary_scaling_factor=2)
+```
+
+### Using Transformers.js
+
+If you haven't already, you can install the [Transformers.js](https://huggingface.co/docs/transformers.js) JavaScript library from [NPM](https://www.npmjs.com/package/@xenova/transformers) by running:
+```bash
+npm i @xenova/transformers
+```
+
+You can then use the model to compute embeddings as follows:
+
+```js
+import { pipeline, dot } from '@xenova/transformers';
+
+// Create feature extraction pipeline
+const extractor = await pipeline('feature-extraction', 'Snowflake/snowflake-arctic-embed-m-long', {
+    quantized: false, // Comment out this line to use the quantized version
+});
+
+// Generate sentence embeddings
+const sentences = [
+    'Represent this sentence for searching relevant passages: Where can I get the best tacos?',
+    'The Data Cloud!',
+    'Mexico City of Course!',
+]
+const output = await extractor(sentences, { normalize: true, pooling: 'cls' });
+
+// Compute similarity scores
+const [source_embeddings, ...document_embeddings ] = output.tolist();
+const similarities = document_embeddings.map(x => dot(source_embeddings, x));
+console.log(similarities); // [0.36740492125676116, 0.42407774292046635]
 ```
 
 
