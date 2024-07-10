@@ -133,7 +133,7 @@ Based on the [intfloat/e5-large-unsupervised](https://huggingface.co/intfloat/e5
 
 ### [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5)
 
-Based on the [google-bert/bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased) model, this variant of our medium model is trained with Matryoshka Representation Learning (MRL) loss to deliver exceptional retrieval performance even when vectors are truncated to 256 dimensions.
+Based on the [google-bert/bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased) model, this variant of our medium model is trained with [Matryoshka Representation Learning (MRL) loss](https://arxiv.org/abs/2205.13147) to deliver exceptional retrieval performance even when vectors are truncated to 256 dimensions.
 
 
 | Model Name                                                         | MTEB Retrieval Score (NDCG @ 10) |
