@@ -16,10 +16,12 @@
 
 ## News
 
+07/00/2024: Release v1.5 of our `m`-sized model, [snowflake-arctic-embed-m-v1.5](#snowflake-arctic-embed-m-v15)
+
 05/10/2024: Release the [technical report on Arctic Embed](https://arxiv.org/html/2405.05374v1)
 
 
-04/16/2024: Release the ** snowflake-arctic-embed ** family of text embedding models. The releases are state-of-the-art for Retrieval quality at each of their representative size profiles. [Technical Report]() is coming shortly. For more details, please refer to our Github: [Arctic-Embed](https://github.com/Snowflake-Labs/arctic-embed).
+04/16/2024: Release the ** snowflake-arctic-embed ** family of text embedding models. The releases are state-of-the-art for Retrieval quality at each of their representative size profiles. Technical Report is coming shortly. For more details, please refer to our Github: [Arctic-Embed](https://github.com/Snowflake-Labs/arctic-embed).
 
 
 ## Models
@@ -128,6 +130,37 @@ Based on the [intfloat/e5-large-unsupervised](https://huggingface.co/intfloat/e5
 | mxbai-embed-large-v1                                               | 54.39                            |
 | e5-Large-v2                                                        | 50.56                            |
 
+
+### [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5)
+
+Based on the [google-bert/bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased) model, this variant of our medium model is trained with Matryoshka Representation Learning (MRL) loss to deliver exceptional retrieval performance even when vectors are truncated to 256 dimensions.
+
+
+| Model Name                                                         | MTEB Retrieval Score (NDCG @ 10) |
+| ------------------------------------------------------------------ | -------------------------------- |
+| [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5) | 55.17                            |
+| [snowflake-arctic-embed-m](https://huggingface.co/Snowflake/snowflake-arctic-embed-m/) | 54.90                            |
+
+
+| Model                         | Model Parameters   | MTEB Retrieval Score at 256 Dimensions (fraction of arctic-embed-m-v1.5)   |
+|:------------------------------|:-------------------|:---------------------------------------------------------------------------|
+| Snowflake arctic-embed-m-v1.5 | 109M               | 54.3 (100%)                                                                |
+| Google gecko                  | 1200M              | 52.4 (97%)                                                                 |
+| OpenAI text-embedding-3-large | Not Published      | 51.7 (96%)                                                                 |
+| Nomic nomic-embed-text-v1.5   | 138M               | 50.8 (94%)                                                                 |
+
+
+Additionally, this model was designed to pair well with a corpus-independent scalar quantization scheme to achieve great performance even in as little as 128 bytes per vector (24x compression compared to 768 dimensional vectors stored in float32).
+
+| Model Version   |   Dimensionality | Scalar Quantization   | Bytes Per Vector (fraction of baseline)   | MTEB Retrieval Score (fraction of baseline)   | Vectors Per GB (improvement over baseline)   |
+|:----------------|-----------------:|:----------------------|:------------------------------------------|:----------------------------------------------|:---------------------------------------------|
+| v1              |              768 | None (float32)        | 3072 (100%)                               | 54.9 (100%)                                   | 0.33M (1.0x)                                 |
+| v1              |              768 | int8                  | 768 (25%)                                 | 54.9 (100%)                                   | 1.3M (4x)                                    |
+| v1.5            |              768 | int8                  | 768 (25%)                                 | 55.1 (100%)                                   | 1.3M (4x)                                    |
+| v1.5            |              256 | int8                  | 256 (8.3%)                                | 54.3 (99%)                                    | 3.9M (12x)                                   |
+| v1.5            |              256 | int4                  | 128 (4.2%)                                | 53.7 (98%)                                    | 7.8M (24x)                                   |
+
+Good uniform scalar quantization range (used in above eval): -0.18 to 0.18
 
 ## Usage
 
