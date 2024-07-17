@@ -16,10 +16,12 @@
 
 ## News
 
+07/00/2024: Release v1.5 of our `m`-sized model, [snowflake-arctic-embed-m-v1.5](#snowflake-arctic-embed-m-v15)
+
 05/10/2024: Release the [technical report on Arctic Embed](https://arxiv.org/html/2405.05374v1)
 
 
-04/16/2024: Release the ** snowflake-arctic-embed ** family of text embedding models. The releases are state-of-the-art for Retrieval quality at each of their representative size profiles. [Technical Report]() is coming shortly. For more details, please refer to our Github: [Arctic-Embed](https://github.com/Snowflake-Labs/arctic-embed).
+04/16/2024: Release the ** snowflake-arctic-embed ** family of text embedding models. The releases are state-of-the-art for Retrieval quality at each of their representative size profiles. Technical Report is coming shortly. For more details, please refer to our Github: [Arctic-Embed](https://github.com/Snowflake-Labs/arctic-embed).
 
 
 ## Models
@@ -129,91 +131,207 @@ Based on the [intfloat/e5-large-unsupervised](https://huggingface.co/intfloat/e5
 | e5-Large-v2                                                        | 50.56                            |
 
 
+### [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5)
+
+Based on the [google-bert/bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased) model, this variant of our medium model is trained with [Matryoshka Representation Learning (MRL) loss](https://arxiv.org/abs/2205.13147) to deliver exceptional retrieval performance even when vectors are truncated to 256 dimensions.
+
+
+| Model Name                                                         | MTEB Retrieval Score (NDCG @ 10) |
+| ------------------------------------------------------------------ | -------------------------------- |
+| [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5) | 55.14                            |
+| [snowflake-arctic-embed-m](https://huggingface.co/Snowflake/snowflake-arctic-embed-m/) | 54.91                            |
+
+
+| Model                         | Model Parameters   | MTEB Retrieval Score at 256 Dimensions (fraction of arctic-embed-m-v1.5)   |
+|:------------------------------|:-------------------|:---------------------------------------------------------------------------|
+| Snowflake arctic-embed-m-v1.5 | 109M               | 54.2 (100%)                                                                |
+| Google gecko                  | 1200M              | 52.4 (97%)                                                                 |
+| OpenAI text-embedding-3-large | Not Published      | 51.7 (96%)                                                                 |
+| Nomic nomic-embed-text-v1.5   | 138M               | 50.8 (94%)                                                                 |
+
+
+Additionally, this model was designed to pair well with a corpus-independent scalar quantization scheme to achieve great performance even in as little as 128 bytes per vector (24x compression compared to 768 dimensional vectors stored in float32).
+
+| Model Version   |   Dimensionality | Scalar Quantization   | Bytes Per Vector (fraction of baseline)   | MTEB Retrieval Score (fraction of baseline)   | Vectors Per GB (improvement over baseline)   |
+|:----------------|-----------------:|:----------------------|:------------------------------------------|:----------------------------------------------|:---------------------------------------------|
+| v1              |              768 | None (float32)        | 3072 (100%)                               | 54.9 (100%)                                   | 0.33M (1.0x)                                 |
+| v1              |              768 | int8                  | 768 (25%)                                 | 54.9 (100%)                                   | 1.3M (4x)                                    |
+| v1.5            |              768 | int8                  | 768 (25%)                                 | 55.1 (100%)                                   | 1.3M (4x)                                    |
+| v1.5            |              256 | int8                  | 256 (8.3%)                                | 54.2 (99%)                                    | 3.9M (12x)                                   |
+| v1.5            |              256 | int4                  | 128 (4.2%)                                | 53.7 (98%)                                    | 7.8M (24x)                                   |
+
+NOTE: Good uniform scalar quantization ranges to use with this model (and which were used in the eval above), are -0.18 to +0.18 for 4bit and -0.3 to +0.3 for 8bit. For a detailed walkthrough of using integer quantization with `snowflake-arctic-embed-m-v1.5`, check out our [example notebook](compressed_embeddings_examples/score_arctic_embed_m_v1dot5_with_quantization.ipynb).
+
 ## Usage
 
 
 ### Using Sentence Transformers
 
-You can use the sentence-transformers package to use an snowflake-arctic-embed model, as shown below. 
+You can use the sentence-transformers package to use an snowflake-arctic-embed model. Here we show how to use our latest model, `snowflake-arctic-embed-m-v1.5`.
 
 ```python
+import torch
 from sentence_transformers import SentenceTransformer
+from torch.nn.functional import normalize
 
-model = SentenceTransformer("Snowflake/snowflake-arctic-embed-m-long", trust_remote_code=True)
+# Model constant.
+MODEL_ID = "Snowflake/snowflake-arctic-embed-m-v1.5"
 
+# Your queries and docs.
 queries = ['what is snowflake?', 'Where can I get the best tacos?']
 documents = ['The Data Cloud!', 'Mexico City of Course!']
 
+# Load the model.
+model = SentenceTransformer(
+    MODEL_ID, model_kwargs=dict(add_pooling_layer=False),
+)
+
+# Generate text embeddings.
 query_embeddings = model.encode(queries, prompt_name="query")
 document_embeddings = model.encode(documents)
 
+# Scores via dotproduct.
 scores = query_embeddings @ document_embeddings.T
+
+# Pretty-print the results.
 for query, query_scores in zip(queries, scores):
     doc_score_pairs = list(zip(documents, query_scores))
     doc_score_pairs = sorted(doc_score_pairs, key=lambda x: x[1], reverse=True)
-    # Output passages & scores
-    print("Query:", query)
+    print(f'Query: "{query}"')
     for document, score in doc_score_pairs:
-        print(score, document)
-```
-```
-Query: what is snowflake?
-0.46484852 The Data Cloud!
-0.3758855 Mexico City of Course!
-Query: Where can I get the best tacos?
-0.42407742 Mexico City of Course!
-0.36740506 The Data Cloud!
+        print(f'Score: {score:.4f} | Document: "{document}"')
+    print()
+
+#### OUTPUT ####
+# Query: "what is snowflake?"
+# Score: 0.3521 | Document: "The Data Cloud!"
+# Score: 0.2358 | Document: "Mexico City of Course!"
+
+# Query: "Where can I get the best tacos?"
+# Score: 0.3884 | Document: "Mexico City of Course!"
+# Score: 0.2389 | Document: "The Data Cloud!"
+#
+
+#### Variation: Truncated Embeddings ####
+query_embeddings_256 = normalize(torch.from_numpy(query_embeddings)[:, :256])
+doument_embeddings_256 = normalize(torch.from_numpy(document_embeddings)[:, :256])
+scores_256 = query_embeddings_256 @ doument_embeddings_256.T
+
+# Pretty-print the results.
+for query, query_scores in zip(queries, scores_256):
+    doc_score_pairs = sorted(zip(documents, query_scores), key=lambda x: x[1], reverse=True)
+    print(f'Query: "{query}"')
+    for document, score in doc_score_pairs:
+        print(f'Score: {score:.4f} | Document: "{document}"')
+    print()
+
+#### OUTPUT ####
+# Query: "what is snowflake?"
+# Score: 0.3852 | Document: "The Data Cloud!"
+# Score: 0.2721 | Document: "Mexico City of Course!"
+
+# Query: "Where can I get the best tacos?"
+# Score: 0.4337 | Document: "Mexico City of Course!"
+# Score: 0.2886 | Document: "The Data Cloud!"
+#
 ```
 
 ### Using Huggingface transformers
 
 
-You can use the transformers package to use an snowflake-arctic-embed model, as shown below. For optimal retrieval quality, use the CLS token to embed each text portion and use the query prefix below (just on the query).
-
+You can use the transformers package to use an snowflake-arctic-embed model, too. Here we show how to use our latest model, `snowflake-arctic-embed-m-v1.5`. For optimal retrieval quality, use the CLS token to embed each text portion and use the query prefix below (just on the query).
 
 
 ```python
 import torch
+from torch.nn.functional import normalize
 from transformers import AutoModel, AutoTokenizer
 
-tokenizer = AutoTokenizer.from_pretrained('Snowflake/snowflake-arctic-embed-m-long')
-model = AutoModel.from_pretrained('Snowflake/snowflake-arctic-embed-m-long', trust_remote_code=True, add_pooling_layer=False, safe_serialization=True)
+# Model constants.
+MODEL_ID = "Snowflake/snowflake-arctic-embed-m-v1.5"
+QUERY_PREFIX = 'Represent this sentence for searching relevant passages: '
+
+# Your queries and docs.
+queries  = ['what is snowflake?', 'Where can I get the best tacos?']
+documents = ['The Data Cloud!', 'Mexico City of Course!']
+
+# Load the model and tokenizer.
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+model = AutoModel.from_pretrained(MODEL_ID, add_pooling_layer=False)
 model.eval()
 
-query_prefix = 'Represent this sentence for searching relevant passages: '
-queries  = ['what is snowflake?', 'Where can I get the best tacos?']
-queries_with_prefix = ["{}{}".format(query_prefix, i) for i in queries]
+# Add query prefix and tokenize queries and docs.
+queries_with_prefix = [f"{QUERY_PREFIX}{q}" for q in queries]
 query_tokens = tokenizer(queries_with_prefix, padding=True, truncation=True, return_tensors='pt', max_length=512)
-
-documents = ['The Data Cloud!', 'Mexico City of Course!']
 document_tokens =  tokenizer(documents, padding=True, truncation=True, return_tensors='pt', max_length=512)
 
-# Compute token embeddings
-with torch.no_grad():
+# Use the model to generate text embeddings.
+with torch.inference_mode():
     query_embeddings = model(**query_tokens)[0][:, 0]
     doument_embeddings = model(**document_tokens)[0][:, 0]
 
+# Remember to normalize embeddings.
+query_embeddings = normalize(query_embeddings)
+doument_embeddings = normalize(doument_embeddings)
 
-# normalize embeddings
-query_embeddings = torch.nn.functional.normalize(query_embeddings, p=2, dim=1)
-doument_embeddings = torch.nn.functional.normalize(doument_embeddings, p=2, dim=1)
+# Scores via dotproduct.
+scores = query_embeddings @ document_embeddings.T
 
-scores = torch.mm(query_embeddings, doument_embeddings.transpose(0, 1))
+# Pretty-print the results.
 for query, query_scores in zip(queries, scores):
     doc_score_pairs = list(zip(documents, query_scores))
     doc_score_pairs = sorted(doc_score_pairs, key=lambda x: x[1], reverse=True)
-    #Output passages & scores
-    print("Query:", query)
+    print(f'Query: "{query}"')
     for document, score in doc_score_pairs:
-        print(score, document)
+        print(f'Score: {score:.4f} | Document: "{document}"')
+    print()
+
+#### OUTPUT ####
+# Query: "what is snowflake?"
+# Score: 0.3521 | Document: "The Data Cloud!"
+# Score: 0.2358 | Document: "Mexico City of Course!"
+
+# Query: "Where can I get the best tacos?"
+# Score: 0.3884 | Document: "Mexico City of Course!"
+# Score: 0.2389 | Document: "The Data Cloud!"
+#
+
+#### Variation: Truncated Embeddings ####
+query_embeddings_256 = normalize(query_embeddings[:, :256])
+doument_embeddings_256 = normalize(doument_embeddings[:, :256])
+scores_256 = query_embeddings_256 @ doument_embeddings_256.T
+
+# Pretty-print the results.
+for query, query_scores in zip(queries, scores_256):
+    doc_score_pairs = sorted(zip(documents, query_scores), key=lambda x: x[1], reverse=True)
+    print(f'Query: "{query}"')
+    for document, score in doc_score_pairs:
+        print(f'Score: {score:.4f} | Document: "{document}"')
+    print()
+
+#### OUTPUT ####
+# Query: "what is snowflake?"
+# Score: 0.3852 | Document: "The Data Cloud!"
+# Score: 0.2721 | Document: "Mexico City of Course!"
+
+# Query: "Where can I get the best tacos?"
+# Score: 0.4337 | Document: "Mexico City of Course!"
+# Score: 0.2886 | Document: "The Data Cloud!"
+#
 ```
 
+### Usage Note: Long Context Embedding With `m-long`
 
-If you use the long context model with more than 2048 tokens, ensure that you initialize the model like below instead. This will use [RPE](https://arxiv.org/abs/2104.09864) to allow up to 8192 tokens.
+If you use the long context model with more than 2048 tokens, ensure that you initialize the model like below instead. This will use [RoPE](https://arxiv.org/abs/2104.09864) to allow up to 8192 tokens.
 
 
-``` py
-model = AutoModel.from_pretrained('Snowflake/snowflake-arctic-embed-m-long', trust_remote_code=True, safe_serialization=True, rotary_scaling_factor=2)
+``` python
+model = AutoModel.from_pretrained(
+    'Snowflake/snowflake-arctic-embed-m-long',
+    trust_remote_code=True,
+    safe_serialization=True,
+    rotary_scaling_factor=2
+)
 ```
 
 ### Using Transformers.js
@@ -223,7 +341,7 @@ If you haven't already, you can install the [Transformers.js](https://huggingfac
 npm i @xenova/transformers
 ```
 
-You can then use the model to compute embeddings as follows:
+You can then compute embeddings from arctic-embed models as follows (`m-long` variant shown):
 
 ```js
 import { pipeline, dot } from '@xenova/transformers';
