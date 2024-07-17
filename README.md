@@ -170,10 +170,12 @@ Good uniform scalar quantization range (used in above eval): -0.18 to 0.18. For 
 You can use the sentence-transformers package to use an snowflake-arctic-embed model. Here we show how to use our latest model, `snowflake-arctic-embed-m-v1.5`.
 
 ```python
+import torch
 from sentence_transformers import SentenceTransformer
+from torch.nn.functional import normalize
 
 # Model constant.
-MODEL_ID = "Snowflake//snowflake-arctic-embed-m-v1.5"
+MODEL_ID = "Snowflake/snowflake-arctic-embed-m-v1.5"
 
 # Your queries and docs.
 queries = ['what is snowflake?', 'Where can I get the best tacos?']
@@ -211,8 +213,8 @@ for query, query_scores in zip(queries, scores):
 #
 
 #### Variation: Truncated Embeddings ####
-query_embeddings_256 = normalize(query_embeddings[:, :256])
-doument_embeddings_256 = normalize(doument_embeddings[:, :256])
+query_embeddings_256 = normalize(torch.from_numpy(query_embeddings)[:, :256])
+doument_embeddings_256 = normalize(torch.from_numpy(document_embeddings)[:, :256])
 scores_256 = query_embeddings_256 @ doument_embeddings_256.T
 
 # Pretty-print the results.
