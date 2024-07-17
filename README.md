@@ -160,7 +160,7 @@ Additionally, this model was designed to pair well with a corpus-independent sca
 | v1.5            |              256 | int8                  | 256 (8.3%)                                | 54.2 (99%)                                    | 3.9M (12x)                                   |
 | v1.5            |              256 | int4                  | 128 (4.2%)                                | 53.7 (98%)                                    | 7.8M (24x)                                   |
 
-Good uniform scalar quantization range (used in above eval): -0.18 to 0.18. For a detailed walkthrough of int4 quantization with `snowflake-arctic-embed-m-v1.5`, check out our [example notebook](compressed_embeddings_examples/score_arctic_embed_m_v1dot5_with_quantization.ipynb).
+NOTE: Good uniform scalar quantization ranges to use with this model (and which were used in the eval above), are -0.18 to +0.18 for 4bit and -0.3 to +0.3 for 8bit. For a detailed walkthrough of using integer quantization with `snowflake-arctic-embed-m-v1.5`, check out our [example notebook](compressed_embeddings_examples/score_arctic_embed_m_v1dot5_with_quantization.ipynb).
 
 ## Usage
 
