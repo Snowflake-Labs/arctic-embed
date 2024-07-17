@@ -144,7 +144,7 @@ Based on the [google-bert/bert-base-uncased](https://huggingface.co/google-bert/
 
 | Model                         | Model Parameters   | MTEB Retrieval Score at 256 Dimensions (fraction of arctic-embed-m-v1.5)   |
 |:------------------------------|:-------------------|:---------------------------------------------------------------------------|
-| Snowflake arctic-embed-m-v1.5 | 109M               | 54.3 (100%)                                                                |
+| Snowflake arctic-embed-m-v1.5 | 109M               | 54.2 (100%)                                                                |
 | Google gecko                  | 1200M              | 52.4 (97%)                                                                 |
 | OpenAI text-embedding-3-large | Not Published      | 51.7 (96%)                                                                 |
 | Nomic nomic-embed-text-v1.5   | 138M               | 50.8 (94%)                                                                 |
@@ -157,7 +157,7 @@ Additionally, this model was designed to pair well with a corpus-independent sca
 | v1              |              768 | None (float32)        | 3072 (100%)                               | 54.9 (100%)                                   | 0.33M (1.0x)                                 |
 | v1              |              768 | int8                  | 768 (25%)                                 | 54.9 (100%)                                   | 1.3M (4x)                                    |
 | v1.5            |              768 | int8                  | 768 (25%)                                 | 55.1 (100%)                                   | 1.3M (4x)                                    |
-| v1.5            |              256 | int8                  | 256 (8.3%)                                | 54.3 (99%)                                    | 3.9M (12x)                                   |
+| v1.5            |              256 | int8                  | 256 (8.3%)                                | 54.2 (99%)                                    | 3.9M (12x)                                   |
 | v1.5            |              256 | int4                  | 128 (4.2%)                                | 53.7 (98%)                                    | 7.8M (24x)                                   |
 
 Good uniform scalar quantization range (used in above eval): -0.18 to 0.18. For a detailed walkthrough of int4 quantization with `snowflake-arctic-embed-m-v1.5`, check out our [example notebook](compressed_embeddings_examples/score_arctic_embed_m_v1dot5_with_quantization.ipynb).
