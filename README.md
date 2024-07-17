@@ -138,8 +138,8 @@ Based on the [google-bert/bert-base-uncased](https://huggingface.co/google-bert/
 
 | Model Name                                                         | MTEB Retrieval Score (NDCG @ 10) |
 | ------------------------------------------------------------------ | -------------------------------- |
-| [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5) | 55.17                            |
-| [snowflake-arctic-embed-m](https://huggingface.co/Snowflake/snowflake-arctic-embed-m/) | 54.90                            |
+| [snowflake-arctic-embed-m-v1.5](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v1.5) | 55.14                            |
+| [snowflake-arctic-embed-m](https://huggingface.co/Snowflake/snowflake-arctic-embed-m/) | 54.91                            |
 
 
 | Model                         | Model Parameters   | MTEB Retrieval Score at 256 Dimensions (fraction of arctic-embed-m-v1.5)   |
