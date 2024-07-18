@@ -16,7 +16,7 @@
 
 ## News
 
-07/00/2024: Release v1.5 of our `m`-sized model, [snowflake-arctic-embed-m-v1.5](#snowflake-arctic-embed-m-v15)
+07/18/2024: Release v1.5 of our `m`-sized model, [snowflake-arctic-embed-m-v1.5](#snowflake-arctic-embed-m-v15)
 
 05/10/2024: Release the [technical report on Arctic Embed](https://arxiv.org/html/2405.05374v1)
 
