@@ -16,6 +16,11 @@
 
 ## News
 
+12/11/2024: Release of technical report
+[[2412.04506] Arctic-Embed 2.0: Multilingual Retrieval Without Compromise](https://arxiv.org/abs/2412.04506)
+
+12/04/2024: Release of [snowflake-arctic-embed-l-v2.0](https://huggingface.co/Snowflake/snowflake-arctic-embed-l-v2.0) and [snowflake-arctic-embed-m-v2.0](https://huggingface.co/Snowflake/snowflake-arctic-embed-m-v2.0) our newest models with multilingual workloads in mind.
+
 07/26/2024: Release preprint [[2407.18887] Embedding And Clustering Your Data Can Improve Contrastive Pretraining](https://arxiv.org/abs/2407.18887) on arXiv.
 
 07/18/2024: Release v1.5 of our `m`-sized model, [snowflake-arctic-embed-m-v1.5](#snowflake-arctic-embed-m-v15). Details about the development of this model are available in the [launch post on the Snowflake engineering blog](https://www.snowflake.com/engineering-blog/arctic-embed-m-v1-5-enterprise-retrieval/).
