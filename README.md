@@ -16,6 +16,8 @@
 
 ## News
 
+12/18/2024: Release of Arctic Embed on the [Weaviate Podcast](https://www.youtube.com/watch?v=Kjqv4uk3RCs) with Luke Merrick, Puxuan Yu, Charles Pierse, and Connor Shorten.
+
 12/11/2024: Release of technical report
 [[2412.04506] Arctic-Embed 2.0: Multilingual Retrieval Without Compromise](https://arxiv.org/abs/2412.04506)
 
