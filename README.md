@@ -16,6 +16,8 @@
 
 ## News
 
+12/18/2024: Arctic Embed on the [Weaviate Podcast](https://www.youtube.com/watch?v=Kjqv4uk3RCs) with Luke Merrick, Puxuan Yu, Charles Pierse, and Connor Shorten.
+
 07/26/2024: Release preprint [[2407.18887] Embedding And Clustering Your Data Can Improve Contrastive Pretraining](https://arxiv.org/abs/2407.18887) on arXiv.
 
 07/18/2024: Release v1.5 of our `m`-sized model, [snowflake-arctic-embed-m-v1.5](#snowflake-arctic-embed-m-v15). Details about the development of this model are available in the [launch post on the Snowflake engineering blog](https://www.snowflake.com/engineering-blog/arctic-embed-m-v1-5-enterprise-retrieval/).
