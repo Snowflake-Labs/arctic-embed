@@ -4,6 +4,9 @@ import logging
 from torch import Tensor
 from typing import Mapping
 
+# Debug marker
+print("Utils module loaded")
+
 
 def _setup_logger():
     log_format = logging.Formatter("[%(asctime)s %(levelname)s] %(message)s")
