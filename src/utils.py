@@ -44,6 +44,7 @@ def move_to_cuda(sample):
 def pool(last_hidden_states: Tensor,
          attention_mask: Tensor,
          pool_type: str) -> Tensor:
+    print("Pooling function called")
     last_hidden = last_hidden_states.masked_fill(~attention_mask[..., None].bool(), 0.0)
 
     if pool_type == "avg":
